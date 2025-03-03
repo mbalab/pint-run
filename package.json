@@ -63,8 +63,7 @@
     "@upstash/redis": "latest",
     "@upstash/ratelimit": "latest",
     "fs": "latest",
-    "path": "latest",
-    "swr": "latest"
+    "path": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

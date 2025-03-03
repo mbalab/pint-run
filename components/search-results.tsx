@@ -1,46 +1,31 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import type { ViewMode } from "@/types/pub"
+import { samplePubs } from "@/data/sample-pubs"
+import { FilterPanel } from "@/components/filter-panel"
+import { ViewToggle } from "@/components/view-toggle"
 import { PubGrid } from "@/components/pub-grid"
 import { PubList } from "@/components/pub-list"
 import { PubMap } from "@/components/pub-map"
-import { ViewToggle } from "@/components/view-toggle"
-import { useFilters } from "@/context/filter-context"
-import type { PubData } from "@/types/data"
 
-interface SearchResultsProps {
-  initialPubs: PubData[]
-}
-
-export function SearchResults({ initialPubs }: SearchResultsProps) {
-  const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid")
-  const [pubs] = useState(initialPubs)
-  const { filters } = useFilters()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
-  // Client-side filtering based on current filters
-  const filteredPubs = pubs.filter((pub) => {
-    if (filters.minRating && pub.rating.overall < filters.minRating) {
-      return false
-    }
-    if (filters.features?.length && !filters.features.every((f) => pub.features.includes(f))) {
-      return false
-    }
-    return true
-  })
+export default function SearchResults({ initialQuery }: { initialQuery?: string }) {
+  const [viewMode, setViewMode] = useState<ViewMode>("grid")
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <p className="text-sm text-muted-foreground">{filteredPubs.length} pubs found</p>
-        <ViewToggle mode={viewMode} onChange={setViewMode} />
-      </div>
+    <div className="flex gap-8">
+      <FilterPanel />
 
-      {viewMode === "grid" && <PubGrid pubs={filteredPubs} />}
-      {viewMode === "list" && <PubList pubs={filteredPubs} />}
-      {viewMode === "map" && <PubMap pubs={filteredPubs} />}
+      <div className="flex-1">
+        <div className="flex justify-between items-center mb-6">
+          <p className="text-sm text-muted-foreground">{samplePubs.length} pubs found</p>
+          <ViewToggle mode={viewMode} onChange={setViewMode} />
+        </div>
+
+        {viewMode === "grid" && <PubGrid pubs={samplePubs} />}
+        {viewMode === "list" && <PubList pubs={samplePubs} />}
+        {viewMode === "map" && <PubMap pubs={samplePubs} />}
+      </div>
     </div>
   )
 }
