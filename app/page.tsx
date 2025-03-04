@@ -1,12 +1,11 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { PubCarousel } from "@/components/pub/pub-carousel"
 import { CategoryNav } from "@/components/pub/category-nav"
 import { BlogCard } from "@/components/blog/blog-card"
 import { PubCard } from "@/components/pub/pub-card"
+import { GeoSearchInput } from "@/components/geo-search-input"
 
 // Sample data - in a real app, this would come from an API or database
 const topRatedPubs = [
@@ -171,11 +170,9 @@ export default function Home() {
             Find authentic pubs with character and charm, from historic taverns to local favorites
           </p>
           <div className="w-full max-w-md relative">
-            <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-            <Input
-              type="search"
+            <GeoSearchInput
               placeholder="Search for pubs by name or location..."
-              className="w-full pl-10 h-12 bg-white/95 text-foreground"
+              className="w-full h-12 bg-white/95 text-foreground"
             />
             <Button className="absolute right-1 top-1 h-10">Search</Button>
           </div>
@@ -206,33 +203,6 @@ export default function Home() {
                   <PubCard key={pub.id} pub={pub} />
                 ))}
             </div>
-          </div>
-        </section>
-
-        {/* Featured Neighborhoods */}
-        <section className="py-12">
-          <h2 className="text-2xl font-bold mb-6">Featured Neighborhoods</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredNeighborhoods.map((neighborhood) => (
-              <Link
-                key={neighborhood.id}
-                href={`/search?neighborhood=${encodeURIComponent(neighborhood.name)}`}
-                className="group"
-              >
-                <div className="relative h-60 rounded-lg overflow-hidden">
-                  <Image
-                    src={neighborhood.image || "/placeholder.svg"}
-                    alt={neighborhood.name}
-                    fill
-                    className="object-cover transition-transform group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
-                    <h3 className="text-xl font-bold text-white">{neighborhood.name}</h3>
-                    <p className="text-white/80 text-sm">{neighborhood.pubCount} pubs</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
           </div>
         </section>
 

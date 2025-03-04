@@ -1,7 +1,6 @@
 import Link from "next/link"
-import { Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { GeoSearchInput } from "@/components/geo-search-input"
 
 export default function Header() {
   return (
@@ -30,14 +29,7 @@ export default function Header() {
           </Link>
         </div>
         <div className="flex-1 max-w-md mx-4">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search for pubs..."
-              className="w-full bg-background pl-8 md:w-[300px] lg:w-[400px]"
-            />
-          </div>
+          <GeoSearchInput placeholder="Search for pubs..." className="w-full bg-background md:w-[300px] lg:w-[400px]" />
         </div>
         <nav className="hidden md:flex items-center gap-4">
           <Link href="/blog" className="text-sm font-medium hover:text-primary">

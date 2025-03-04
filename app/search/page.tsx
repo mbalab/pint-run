@@ -159,6 +159,11 @@ export default function SearchPage() {
     neighborhood: [],
   })
 
+  const [mapView, setMapView] = useState(false)
+  const [lat, setLat] = useState(0)
+  const [lng, setLng] = useState(0)
+  const [radius, setRadius] = useState(1)
+
   // Function to toggle filter panel on mobile
   const toggleFilter = () => {
     setIsFilterOpen(!isFilterOpen)
@@ -193,6 +198,56 @@ export default function SearchPage() {
       }
       return newFilters
     })
+  }
+
+  // Handle View on Map button click
+  const handleViewOnMap = () => {
+    // If map is already visible, hide it
+    if (mapView) {
+      setMapView(false)
+
+      // Update URL to remove map parameters but keep other filters
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete("view")
+      params.delete("lat")
+      params.delete("lng")
+      params.delete("radius")
+
+      if (params.toString()) {
+        router.push(`/search?${params.toString()}`)
+      } else {
+        router.push("/search")
+      }
+      return
+    }
+
+    // If map is not visible, show it with geolocation
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords
+          setMapView(true)
+          setLat(latitude)
+          setLng(longitude)
+          setRadius(1)
+
+          // Preserve existing search parameters when adding map view
+          const params = new URLSearchParams(searchParams.toString())
+          params.set("view", "map")
+          params.set("lat", latitude.toString())
+          params.set("lng", longitude.toString())
+          params.set("radius", "1")
+
+          router.push(`/search?${params.toString()}`)
+        },
+        (error) => {
+          console.error("Error getting location:", error)
+          alert("Unable to get your location. Please try again or allow location access in your browser settings.")
+        },
+      )
+    } else {
+      alert("Geolocation is not supported by your browser")
+    }
   }
 
   // Apply filters to pubs
@@ -230,29 +285,47 @@ export default function SearchPage() {
     setFilteredPubs(result)
 
     // Update URL with filter parameters
-    const params = new URLSearchParams()
+    const params = new URLSearchParams(searchParams.toString())
 
     if (activeFilters.categories.length === 1) {
       params.set("category", activeFilters.categories[0])
+    } else {
+      params.delete("category")
     }
 
     if (activeFilters.neighborhood.length === 1) {
       params.set("neighborhood", activeFilters.neighborhood[0])
+    } else {
+      params.delete("neighborhood")
     }
 
-    // Only update URL if we have filters to add
-    if (params.toString()) {
-      router.push(`/search?${params.toString()}`)
-    } else if (searchParams.toString()) {
-      // If we had filters but now they're all cleared, remove params from URL
-      router.push("/search")
+    // Only update URL if we have filters to add and we're not in map view
+    if (!mapView) {
+      if (params.toString()) {
+        router.push(`/search?${params.toString()}`)
+      } else if (searchParams.toString() && !searchParams.has("view")) {
+        // If we had filters but now they're all cleared, remove params from URL
+        router.push("/search")
+      }
     }
-  }, [activeFilters, router, searchParams])
+  }, [activeFilters, router, searchParams, mapView])
 
   // Read URL parameters on initial load
   useEffect(() => {
     const category = searchParams.get("category")
     const neighborhood = searchParams.get("neighborhood")
+    const view = searchParams.get("view")
+    const latParam = searchParams.get("lat")
+    const lngParam = searchParams.get("lng")
+    const radiusParam = searchParams.get("radius")
+
+    // Set map view state
+    setMapView(view === "map")
+    if (latParam && lngParam) {
+      setLat(Number.parseFloat(latParam))
+      setLng(Number.parseFloat(lngParam))
+      setRadius(radiusParam ? Number.parseFloat(radiusParam) : 1)
+    }
 
     const initialFilters = {
       categories: category ? [category] : [],
@@ -283,6 +356,13 @@ export default function SearchPage() {
       items.push({
         label: activeFilters.neighborhood[0],
         href: `/search?neighborhood=${encodeURIComponent(activeFilters.neighborhood[0])}`,
+      })
+    }
+
+    if (mapView) {
+      items.push({
+        label: "Map View",
+        href: `/search?view=map&lat=${lat}&lng=${lng}&radius=${radius}`,
       })
     }
 
@@ -317,9 +397,18 @@ export default function SearchPage() {
             <p className="text-muted-foreground">
               {filteredPubs.length} {filteredPubs.length === 1 ? "pub" : "pubs"} found
             </p>
-            <Button className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              View on Map
+            <Button className="flex items-center gap-2" onClick={handleViewOnMap}>
+              {mapView ? (
+                <>
+                  <X className="h-4 w-4" />
+                  Close Map View
+                </>
+              ) : (
+                <>
+                  <MapPin className="h-4 w-4" />
+                  View on Map
+                </>
+              )}
             </Button>
           </div>
 
@@ -407,6 +496,32 @@ export default function SearchPage() {
               </div>
             </div>
           )}
+
+          {mapView && lat && lng ? (
+            <div className="w-full h-[600px] bg-muted rounded-lg relative mb-6">
+              <div className="absolute inset-0 flex items-center justify-center flex-col p-4 text-center">
+                <h3 className="text-lg font-medium mb-2">Map View</h3>
+                <p className="text-muted-foreground mb-4">
+                  Showing pubs within {radius} mile{radius !== 1 ? "s" : ""} of your location
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Coordinates: {lat.toFixed(6)}, {lng.toFixed(6)}
+                </p>
+                <div className="mt-8 w-full max-w-md">
+                  <div className="h-8 w-full bg-primary/20 rounded-full overflow-hidden relative">
+                    <div
+                      className="h-full bg-primary rounded-full absolute left-0 top-0"
+                      style={{ width: "60%" }}
+                    ></div>
+                    <div className="absolute inset-0 flex items-center justify-center text-xs font-medium">
+                      Loading map data...
+                    </div>
+                  </div>
+                </div>
+                {/* In a real implementation, you would integrate a map library like Google Maps, Mapbox, or Leaflet here */}
+              </div>
+            </div>
+          ) : null}
 
           {/* Results Grid */}
           {filteredPubs.length > 0 ? (
