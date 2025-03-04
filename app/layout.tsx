@@ -1,43 +1,40 @@
 import type React from "react"
-import "./globals.css"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Playfair_Display } from "next/font/google"
+import "./globals.css"
+import Header from "@/components/layout/header"
+import Footer from "@/components/layout/footer"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+})
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+})
 
 export const metadata: Metadata = {
-  title: "Pint.run - UK Pub Directory",
-  description: "Discover and explore the best pubs across the United Kingdom",
-  keywords: [
-    "pubs",
-    "UK pubs",
-    "pub finder",
-    "pub directory",
-    "beer",
-    "real ale",
-    "England pubs",
-    "Scotland pubs",
-    "Wales pubs",
-    "Northern Ireland pubs",
-  ],
+  title: "Pint Run | Discover the Best Pubs",
+  description:
+    "Find the best pubs with Pint Run's unique rating system. Explore historical pubs, best ales, Sunday roasts, and more.",
     generator: 'v0.dev'
 }
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-      </head>
-      <body className={inter.className}>
-        {children}
-
-        {/* Google AdSense script would go here in production */}
-        {/* <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossOrigin="anonymous"></script> */}
+      <body className={`${inter.variable} ${playfair.variable} font-sans`}>
+        <div className="flex min-h-screen flex-col">
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   )
