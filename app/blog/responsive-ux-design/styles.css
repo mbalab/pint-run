@@ -1,0 +1,57 @@
+/* Add Tailwind Typography plugin styles for the blog content */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for the blog post */
+.prose {
+  @apply text-foreground;
+}
+
+.prose h2 {
+  @apply text-2xl font-bold mt-8 mb-4 scroll-mt-20;
+}
+
+.prose h3 {
+  @apply text-xl font-bold mt-6 mb-3 scroll-mt-20;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+
+.prose ul {
+  @apply my-4 pl-6 list-disc;
+}
+
+.prose li {
+  @apply mb-2;
+}
+
+.prose strong {
+  @apply font-semibold;
+}
+
+.prose blockquote {
+  @apply italic border-l-4 border-primary pl-4 py-1 my-4;
+}
+
+.prose figure {
+  @apply my-8;
+}
+
+.prose figcaption {
+  @apply text-center text-sm text-muted-foreground mt-2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .prose h2 {
+    @apply text-xl;
+  }
+
+  .prose h3 {
+    @apply text-lg;
+  }
+}
+

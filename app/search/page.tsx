@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Fragment } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Filter, MapPin, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Breadcrumb } from "@/components/ui/breadcrumb"
-import { PubGrid } from "@/components/pub/pub-grid"
 import { FilterPanel } from "@/components/search/filter-panel"
+import { AdPlaceholder } from "@/components/ads/AdPlaceholder"
+import { shouldRenderAd } from "@/lib/utils/ads"
+import { PubCard } from "@/components/pub/pub-card" // Import PubCard component
 
 // Sample data - in a real app, this would come from an API or database
 const allPubs = [
@@ -138,6 +140,38 @@ const allPubs = [
     features: ["Beer Garden", "Real Ales", "Food Served", "Outdoor Seating"],
     priceRange: "££",
   },
+  {
+    id: "9",
+    name: "The Mayflower",
+    slug: "the-mayflower",
+    image: "/placeholder.svg?height=300&width=500",
+    location: {
+      neighborhood: "Rotherhithe",
+      city: "london",
+      country: "uk",
+    },
+    rating: 8.5,
+    primaryCategory: "Historical Pubs",
+    localsTouristsValue: 65,
+    features: ["Beer Garden", "Real Ales", "Food Served", "Outdoor Seating"],
+    priceRange: "££",
+  },
+  {
+    id: "10",
+    name: "The Old Bank of England",
+    slug: "the-old-bank-of-england",
+    image: "/placeholder.svg?height=300&width=500",
+    location: {
+      neighborhood: "Fleet Street",
+      city: "london",
+      country: "uk",
+    },
+    rating: 8.3,
+    primaryCategory: "Historical Pubs",
+    localsTouristsValue: 60,
+    features: ["Beer Garden", "Real Ales", "Food Served"],
+    priceRange: "££",
+  },
 ]
 
 export default function SearchPage() {
@@ -148,15 +182,13 @@ export default function SearchPage() {
   const [activeFilters, setActiveFilters] = useState<{
     categories: string[]
     features: string[]
-    atmosphere: string[]
+    pubVibe: string[]
     priceRange: string[]
-    neighborhood: string[]
   }>({
     categories: [],
     features: [],
-    atmosphere: [],
+    pubVibe: [],
     priceRange: [],
-    neighborhood: [],
   })
 
   const [mapView, setMapView] = useState(false)
@@ -174,9 +206,8 @@ export default function SearchPage() {
     setActiveFilters({
       categories: [],
       features: [],
-      atmosphere: [],
+      pubVibe: [],
       priceRange: [],
-      neighborhood: [],
     })
 
     // Update URL to remove all filter parameters
@@ -185,7 +216,7 @@ export default function SearchPage() {
 
   // Function to handle filter changes
   const handleFilterChange = (
-    filterType: "categories" | "features" | "atmosphere" | "priceRange" | "neighborhood",
+    filterType: "categories" | "features" | "pubVibe" | "priceRange",
     value: string,
     isChecked: boolean,
   ) => {
@@ -264,22 +295,29 @@ export default function SearchPage() {
       result = result.filter((pub) => activeFilters.features.some((feature) => pub.features.includes(feature)))
     }
 
-    // Filter by atmosphere (locals vs tourists)
-    if (activeFilters.atmosphere.includes("Local Favorite")) {
-      result = result.filter((pub) => pub.localsTouristsValue <= 40)
-    }
-    if (activeFilters.atmosphere.includes("Tourist Friendly")) {
-      result = result.filter((pub) => pub.localsTouristsValue >= 60)
+    // Filter by pub vibe (locals vs tourists)
+    if (activeFilters.pubVibe.length > 0) {
+      result = result.filter((pub) => {
+        if (activeFilters.pubVibe.includes("Local Favorite") && pub.localsTouristsValue <= 35) {
+          return true
+        }
+        if (
+          activeFilters.pubVibe.includes("Mixed Crowd") &&
+          pub.localsTouristsValue > 35 &&
+          pub.localsTouristsValue < 65
+        ) {
+          return true
+        }
+        if (activeFilters.pubVibe.includes("Tourist Friendly") && pub.localsTouristsValue >= 65) {
+          return true
+        }
+        return false
+      })
     }
 
     // Filter by price range
     if (activeFilters.priceRange.length > 0) {
       result = result.filter((pub) => activeFilters.priceRange.includes(pub.priceRange))
-    }
-
-    // Filter by neighborhood
-    if (activeFilters.neighborhood.length > 0) {
-      result = result.filter((pub) => activeFilters.neighborhood.includes(pub.location.neighborhood))
     }
 
     setFilteredPubs(result)
@@ -291,12 +329,6 @@ export default function SearchPage() {
       params.set("category", activeFilters.categories[0])
     } else {
       params.delete("category")
-    }
-
-    if (activeFilters.neighborhood.length === 1) {
-      params.set("neighborhood", activeFilters.neighborhood[0])
-    } else {
-      params.delete("neighborhood")
     }
 
     // Only update URL if we have filters to add and we're not in map view
@@ -313,7 +345,6 @@ export default function SearchPage() {
   // Read URL parameters on initial load
   useEffect(() => {
     const category = searchParams.get("category")
-    const neighborhood = searchParams.get("neighborhood")
     const view = searchParams.get("view")
     const latParam = searchParams.get("lat")
     const lngParam = searchParams.get("lng")
@@ -330,13 +361,12 @@ export default function SearchPage() {
     const initialFilters = {
       categories: category ? [category] : [],
       features: [],
-      atmosphere: [],
+      pubVibe: [],
       priceRange: [],
-      neighborhood: neighborhood ? [neighborhood] : [],
     }
 
     // Only set filters if we have parameters
-    if (category || neighborhood) {
+    if (category) {
       setActiveFilters(initialFilters)
     }
   }, [searchParams])
@@ -352,13 +382,6 @@ export default function SearchPage() {
       })
     }
 
-    if (activeFilters.neighborhood.length === 1) {
-      items.push({
-        label: activeFilters.neighborhood[0],
-        href: `/search?neighborhood=${encodeURIComponent(activeFilters.neighborhood[0])}`,
-      })
-    }
-
     if (mapView) {
       items.push({
         label: "Map View",
@@ -367,6 +390,38 @@ export default function SearchPage() {
     }
 
     return items
+  }
+
+  // Custom PubGrid with ad placeholders
+  const PubGridWithAds = () => {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {filteredPubs.map((pub, index) => (
+          <Fragment key={pub.id}>
+            <div>
+              {/* Assuming PubCard component exists */}
+              <PubCard pub={pub} />
+            </div>
+
+            {/* Insert ad after the 4th pub */}
+            {index === 3 && (
+              <div className="col-span-full my-8">
+                {/* AD PLACEHOLDER: Search-AfterFourthPub */}
+                <AdPlaceholder id="search-after-fourth" format="horizontal" />
+              </div>
+            )}
+
+            {/* Insert ad after every 8 pubs (excluding the first ad after the 4th pub) */}
+            {index > 4 && shouldRenderAd(index - 4, 8) && (
+              <div className="col-span-full my-8">
+                {/* AD PLACEHOLDER: Search-Recurring */}
+                <AdPlaceholder id={`search-recurring-${Math.floor((index - 4) / 8)}`} format="horizontal" />
+              </div>
+            )}
+          </Fragment>
+        ))}
+      </div>
+    )
   }
 
   return (
@@ -415,9 +470,8 @@ export default function SearchPage() {
           {/* Active Filters Display */}
           {(activeFilters.categories.length > 0 ||
             activeFilters.features.length > 0 ||
-            activeFilters.atmosphere.length > 0 ||
-            activeFilters.priceRange.length > 0 ||
-            activeFilters.neighborhood.length > 0) && (
+            activeFilters.pubVibe.length > 0 ||
+            activeFilters.priceRange.length > 0) && (
             <div className="mb-6">
               <div className="flex flex-wrap gap-2">
                 {activeFilters.categories.map((filter) => (
@@ -448,14 +502,14 @@ export default function SearchPage() {
                     </button>
                   </div>
                 ))}
-                {activeFilters.atmosphere.map((filter) => (
+                {activeFilters.pubVibe.map((filter) => (
                   <div
                     key={filter}
                     className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm flex items-center gap-1"
                   >
                     {filter}
                     <button
-                      onClick={() => handleFilterChange("atmosphere", filter, false)}
+                      onClick={() => handleFilterChange("pubVibe", filter, false)}
                       aria-label={`Remove ${filter} filter`}
                     >
                       <X className="h-3 w-3" />
@@ -470,20 +524,6 @@ export default function SearchPage() {
                     {filter}
                     <button
                       onClick={() => handleFilterChange("priceRange", filter, false)}
-                      aria-label={`Remove ${filter} filter`}
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-                {activeFilters.neighborhood.map((filter) => (
-                  <div
-                    key={filter}
-                    className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm flex items-center gap-1"
-                  >
-                    {filter}
-                    <button
-                      onClick={() => handleFilterChange("neighborhood", filter, false)}
                       aria-label={`Remove ${filter} filter`}
                     >
                       <X className="h-3 w-3" />
@@ -523,9 +563,9 @@ export default function SearchPage() {
             </div>
           ) : null}
 
-          {/* Results Grid */}
+          {/* Results Grid with Ads */}
           {filteredPubs.length > 0 ? (
-            <PubGrid pubs={filteredPubs} />
+            <PubGridWithAds />
           ) : (
             <div className="text-center py-12">
               <h3 className="text-lg font-medium mb-2">No pubs found</h3>

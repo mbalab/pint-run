@@ -7,12 +7,11 @@ interface FilterPanelProps {
   activeFilters: {
     categories: string[]
     features: string[]
-    atmosphere: string[]
+    pubVibe: string[]
     priceRange: string[]
-    neighborhood: string[]
   }
   onFilterChange: (
-    filterType: "categories" | "features" | "atmosphere" | "priceRange" | "neighborhood",
+    filterType: "categories" | "features" | "pubVibe" | "priceRange",
     value: string,
     isChecked: boolean,
   ) => void
@@ -24,7 +23,7 @@ export function FilterPanel({ activeFilters, onFilterChange, onResetFilters }: F
   const [openSections, setOpenSections] = useState({
     categories: true,
     features: true,
-    atmosphere: true,
+    pubVibe: true,
     priceRange: true,
   })
 
@@ -59,7 +58,7 @@ export function FilterPanel({ activeFilters, onFilterChange, onResetFilters }: F
     "Food Served",
   ]
 
-  const atmosphere = ["Local Favorite", "Tourist Friendly"]
+  const pubVibe = ["Local Favorite", "Mixed Crowd", "Tourist Friendly"]
 
   const priceRange = ["£", "££", "£££"]
 
@@ -160,14 +159,14 @@ export function FilterPanel({ activeFilters, onFilterChange, onResetFilters }: F
           )}
         </div>
 
-        {/* Atmosphere Section */}
+        {/* Pub Vibe Section (previously Atmosphere) */}
         <div className="py-3 border-b">
           <button
             className="flex w-full items-center justify-between py-2 text-left font-medium"
-            onClick={() => toggleSection("atmosphere")}
-            aria-expanded={openSections.atmosphere}
+            onClick={() => toggleSection("pubVibe")}
+            aria-expanded={openSections.pubVibe}
           >
-            Atmosphere
+            Pub Vibe
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -179,25 +178,25 @@ export function FilterPanel({ activeFilters, onFilterChange, onResetFilters }: F
               strokeLinecap="round"
               strokeLinejoin="round"
               className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
-                openSections.atmosphere ? "rotate-180" : ""
+                openSections.pubVibe ? "rotate-180" : ""
               }`}
             >
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
 
-          {openSections.atmosphere && (
+          {openSections.pubVibe && (
             <div className="mt-2 space-y-1 pl-1">
-              {atmosphere.map((item) => (
+              {pubVibe.map((item) => (
                 <div key={item} className="flex items-center space-x-2 py-1.5">
                   <input
                     type="checkbox"
-                    id={`atmosphere-${item}`}
-                    checked={activeFilters.atmosphere.includes(item)}
-                    onChange={(e) => onFilterChange("atmosphere", item, e.target.checked)}
+                    id={`pubVibe-${item}`}
+                    checked={activeFilters.pubVibe.includes(item)}
+                    onChange={(e) => onFilterChange("pubVibe", item, e.target.checked)}
                     className="h-4 w-4 rounded-sm border-gray-300 text-primary focus:ring-primary"
                   />
-                  <label htmlFor={`atmosphere-${item}`} className="text-sm font-medium leading-none cursor-pointer">
+                  <label htmlFor={`pubVibe-${item}`} className="text-sm font-medium leading-none cursor-pointer">
                     {item}
                   </label>
                 </div>
@@ -207,7 +206,7 @@ export function FilterPanel({ activeFilters, onFilterChange, onResetFilters }: F
         </div>
 
         {/* Price Range Section */}
-        <div className="py-3 border-b">
+        <div className="py-3">
           <button
             className="flex w-full items-center justify-between py-2 text-left font-medium"
             onClick={() => toggleSection("priceRange")}

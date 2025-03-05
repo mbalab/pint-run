@@ -6,6 +6,7 @@ import { CategoryNav } from "@/components/pub/category-nav"
 import { BlogCard } from "@/components/blog/blog-card"
 import { PubCard } from "@/components/pub/pub-card"
 import { GeoSearchInput } from "@/components/geo-search-input"
+import { AdPlaceholder } from "@/components/ads/AdPlaceholder"
 
 // Sample data - in a real app, this would come from an API or database
 const topRatedPubs = [
@@ -81,41 +82,6 @@ const topRatedPubs = [
   },
 ]
 
-const featuredNeighborhoods = [
-  {
-    id: "1",
-    name: "Soho",
-    slug: "soho",
-    city: "London",
-    image: "/placeholder.svg?height=300&width=500",
-    pubCount: 42,
-  },
-  {
-    id: "2",
-    name: "Camden",
-    slug: "camden",
-    city: "London",
-    image: "/placeholder.svg?height=300&width=500",
-    pubCount: 38,
-  },
-  {
-    id: "3",
-    name: "Shoreditch",
-    slug: "shoreditch",
-    city: "London",
-    image: "/placeholder.svg?height=300&width=500",
-    pubCount: 35,
-  },
-  {
-    id: "4",
-    name: "Notting Hill",
-    slug: "notting-hill",
-    city: "London",
-    image: "/placeholder.svg?height=300&width=500",
-    pubCount: 28,
-  },
-]
-
 const recentBlogPosts = [
   {
     id: "1",
@@ -187,6 +153,9 @@ export default function Home() {
           pubs={topRatedPubs}
         />
 
+        {/* AD PLACEHOLDER: Homepage-TopSection */}
+        <AdPlaceholder id="home-top" format="horizontal" className="my-12" />
+
         {/* Category Navigation */}
         <CategoryNav />
 
@@ -205,6 +174,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* AD PLACEHOLDER: Homepage-MiddleSection */}
+        <AdPlaceholder id="home-middle" format="horizontal" className="my-12" />
 
         {/* Recent Blog Articles */}
         <section className="py-12">

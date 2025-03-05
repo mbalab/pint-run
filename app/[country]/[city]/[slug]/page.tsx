@@ -7,6 +7,7 @@ import { RatingBadge } from "@/components/ui/rating-badge"
 import { LocalsTouristsSlider } from "@/components/ui/locals-tourists-slider"
 import { PubCard } from "@/components/pub/pub-card"
 import { RatingBreakdown } from "@/components/pub/rating-breakdown"
+import { AdPlaceholder } from "@/components/ads/AdPlaceholder"
 
 interface PubPageProps {
   params: {
@@ -60,7 +61,6 @@ const pubData = {
       drinks: 9.0,
       food: 8.8,
       history: 9.7,
-      external: 9.0,
     },
     localsTouristsValue: 60,
     primaryCategory: "Historical Pubs",
@@ -278,6 +278,9 @@ export default function PubPage({ params }: PubPageProps) {
               </div>
             </div>
 
+            {/* AD PLACEHOLDER: Pub-BetweenGalleryAndLocation */}
+            <AdPlaceholder id="pub-between-sections" format="horizontal" className="my-8" />
+
             <div>
               <h2 className="text-2xl font-bold mb-4">Location & Directions</h2>
               <div className="relative h-[300px] w-full rounded-lg overflow-hidden mb-4 bg-muted">
@@ -445,6 +448,9 @@ export default function PubPage({ params }: PubPageProps) {
                 </Button>
               </div>
             </div>
+
+            {/* AD PLACEHOLDER: Pub-Sidebar */}
+            <AdPlaceholder id="pub-sidebar" format="vertical" className="mx-auto" />
 
             <div>
               <h2 className="text-xl font-bold mb-4">Features</h2>

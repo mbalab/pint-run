@@ -1,6 +1,9 @@
 import type { Metadata } from "next"
 import { Breadcrumb } from "@/components/ui/breadcrumb"
 import { BlogCard } from "@/components/blog/blog-card"
+import { AdPlaceholder } from "@/components/ads/AdPlaceholder"
+import { shouldRenderAd } from "@/lib/utils/ads"
+import { Fragment } from "react"
 
 export const metadata: Metadata = {
   title: "Blog | Pint Run",
@@ -127,8 +130,18 @@ export default function BlogPage() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {blogPosts.slice(1).map((post) => (
-                <BlogCard key={post.id} post={post} />
+              {blogPosts.slice(1).map((post, index) => (
+                <Fragment key={post.id}>
+                  <BlogCard post={post} />
+
+                  {/* Insert ad after every 4 blog post cards */}
+                  {shouldRenderAd(index + 1, 4) && (
+                    <div className="col-span-full my-8">
+                      {/* AD PLACEHOLDER: Blog-AfterPosts */}
+                      <AdPlaceholder id={`blog-after-posts-${Math.floor((index + 1) / 4)}`} format="horizontal" />
+                    </div>
+                  )}
+                </Fragment>
               ))}
             </div>
           </div>
@@ -174,6 +187,9 @@ export default function BlogPage() {
                 ))}
               </div>
             </div>
+
+            {/* AD PLACEHOLDER: Blog-Sidebar */}
+            <AdPlaceholder id="blog-sidebar" format="vertical" className="mx-auto" />
           </div>
         </div>
       </div>
